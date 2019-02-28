@@ -7,13 +7,13 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.util.StringUtils
 
 @Configuration
-class VechainAutoConfiguration {
+class VechainAutoConfiguration(@Value("\${network.arkane.vechain.endpoint.url}") vechainProvider: String) {
 
     companion object Logging {
         val log = LoggerFactory.getLogger(javaClass)
     }
 
-    constructor(@Value("\${network.arkane.vechain.endpoint.url}") vechainProvider: String) {
+    init {
         log.info("starting the vechain provider: -> {}", vechainProvider)
         if (StringUtils.isEmpty(vechainProvider)) {
             throw IllegalArgumentException("Providing a vechain node is necessary (vechain.node)")
