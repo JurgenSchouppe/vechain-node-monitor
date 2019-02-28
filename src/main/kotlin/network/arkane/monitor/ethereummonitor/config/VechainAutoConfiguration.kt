@@ -10,7 +10,7 @@ import org.springframework.util.StringUtils
 class VechainAutoConfiguration(@Value("\${network.arkane.vechain.endpoint.url}") vechainProvider: String) {
 
     companion object Logging {
-        val log = LoggerFactory.getLogger(javaClass)
+        val log = LoggerFactory.getLogger(VechainAutoConfiguration::class.java)!!
     }
 
     init {
@@ -19,7 +19,7 @@ class VechainAutoConfiguration(@Value("\${network.arkane.vechain.endpoint.url}")
             throw IllegalArgumentException("Providing a vechain node is necessary (vechain.node)")
         }
         val nodeProvider = NodeProvider.getNodeProvider()
-        nodeProvider.setProvider(vechainProvider)
+        nodeProvider.provider = vechainProvider
         nodeProvider.setTimeout(10000)
     }
 }

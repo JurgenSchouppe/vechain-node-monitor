@@ -28,20 +28,19 @@ class VechainNodeHealthIndicator : AbstractReactiveHealthIndicator() {
     override fun doHealthCheck(builder: Health.Builder): Mono<Health> {
         try {
             val block = latestBlock
-            if (block.isPresent) {
-                val date = Date(block.get().timestamp * 1000)
+
+            return block.map {
+                val date = Date(it.timestamp * 1000)
                 val blockTime = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault())
-                return if (blockTime.plus(10, ChronoUnit.MINUTES).isBefore(LocalDateTime.now(ZoneId.systemDefault()))) {
-                    Mono.just(builder.status(Status.DOWN)
+                if (blockTime.plus(10, ChronoUnit.MINUTES).isBefore(LocalDateTime.now(ZoneId.systemDefault()))) {
+                    return@map Mono.just(builder.status(Status.DOWN)
                             .withDetail("vechainnode", "last block is older than 30 minutes")
                             .build())
                 } else {
-                    block.map {
-                        Mono.just(builder.up().withDetail("vechainnode", "latest block is " + it.number).build())
-                    }.get()
+                    return@map Mono.just(builder.up().withDetail("vechainnode", """latest block is ${it.number}""").build())
                 }
-            } else {
-                return Mono.just(
+            }.orElseGet {
+                Mono.just(
                         builder.down()
                                 .withDetail("vechainnode.down", "Unable to fetch status for ethereum node").build())
             }
